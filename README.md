@@ -7,3 +7,6 @@
 |1주차|intro what is git?| 없음|
 |2주차|intro what is git?| 없음|
 |3주차|intro what is git?| [3주차 필기](/memo/3주차.txt)|
+
+
+1
