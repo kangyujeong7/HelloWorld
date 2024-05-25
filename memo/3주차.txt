@@ -1,0 +1,198 @@
+4)grep 
+-matchig
+-대소문자 구분함
+-라인 전체를 출력한다
+-언제 많이 쓰냐? :전체 텍스트에서 내가 무언가를 찾고 싶을 때
+-여러개의 파일에서 특정테스트를 찾는 경우에 주오 쓰인다
+Ex) $grep Perl *.txt
+Q. The 가 있는 txt파일을 전체 조회하라.:*
+- -v: 조건 문자열이 없는 라인 출력
+ex)grep –v The animals .txt
+Q /usr/lib(유저 libray)에 포함된 하위 디렉터리 개수 알아내기 (d로시작하는 것은 디렉터리라는 뜻 즉 이문제는d로 시작하는 것의 라인의 개수를 찾아라)
+A. ls -l /usr/lib | grep d | wc –l (x) => ls –l/usr/lib | cut –c1 | grep d | wc -l
+5) sort
+-정렬, 오름차순(abcd...)
+-r (reversed): 거꾸로 정렬
+-숫자 정렬(-n): 숫자는 문자열이랑 다르기 때문에 인식이 안되다. 그것을 위한 특별한 인자가 n이다. 
+  *만약 reverse를쓴다면??
+	sort -n -r sample.txt
+	sort -nr sample.txt :n과 r은 붙여써도 된다.
+Q1. animals.txt 3번째 필드가 숫자이다. 이를 - 오름차순 정렬에서 출력하자.
+A1.cut -f3 animals.txt | sort -n
+
+Q2. 최소값, 최대값 출력하기
+A2. 최소값: cut -f3 animals.txt | sort -n |  head -n1
+	최댓값 : cut -f3 animals.txt | sort -nr | head -n1
+
+Q3. /etc/passwd(=사용자의 목록이 담긴 파일)
+디렉터리에서 사용자 이름 정렬하여 추출하기(오름차순으로)- :로 구분된 필드 중 1번째 == 사용자
+*/etc/passwd의 딜리미네이터(delimiter: 데이터를 분리하는데 사용되는 문자 또는 문자열을의미, 예를 들어
+ 쉼표,탭,세미콜론이 있다.)가 콜론(:)인 이유: 각 필드를 구분하는 데 사용되는 딜리미네이터 
+A3. $ head /etc/passwd | cut -d: -f1 |sort(이경우 10개만 출력된다)
+*그렇다면 전체 출력은 어떻게 하나??
+-개수보다 넘어서 인덱스를 지정해서라도 출력해라 
+
+Q4. 사용자 중 root가 있는지 확인하기/원하면 개수를 세어도 좋다. (root 가 존재하는 라인만 출력)
+-Root,root, ROOT 가 다다르다:grep은 대소문자 구분을 다한다
+-'abcdroot'에서의 root도 출력한다. 
+-_root_=> -w: 단어의 경계를 고려하여 정확한 일치만 찾습니다. 만약 전체단어가 아니라 부분문자열을 포함하는 모든 항목을 찾으려면 이 옵션을 사용하지 않는다. 
+A4.grep -w “root” /etc/passwd
+Q5 . ls , head의 차이
+-ls :파일이나 디렉토리 목록
+-head:파일 내용 조회(파일의 내용을 보려는 것)
+( head에서 나가고 싶다 =>	ctrl +c:강제종료)
+Q6.letters 내용조회하기
+ㅎ-$head letters
+
+6)uniq
+-중복된 문자열을 제거해서 보여주되, 인접한 중복 문자열만 
+- ‘-c’ 옵션을 붙이면 반복건수가 얼마나 되는지 알수 있다.
+Q1.성적표(grades파일)에서 가장 빈번하지 않은 등급부터 출력하기
+sort vs uniq 둘중 무엇을 먼저 해야 할까? 둘의 차이 알기
+AAACCCCBBBAAA
+ sort -> uniq:  
+ex)AAAAAABBBCCCC->ABC
+ uniq ->sort
+ex) ACBA->AABC
+
+Q2) sort -n vs sort 왜 이둘의 결과가 같을까?
+Q3)1. A
+	2. B
+	3. A
+	4. C      에서 숫자랑 문자 분리해서 출력하기 
+A3) $ cut  -f1 grades | sort -n | uniq -c | sort -nr | head -n1 | cut -c9
+
+
+
+*man :시스템 명령어 및 가티 프로그램에 대한 새부정보를 확인할수 있다.
+ =============
+<깃>
+1. 버전관리
+ 	-파일의 변화를 시간에 따라 저장했다가 나중에 특정 시점의 버전으로 다시 꺼내올수 있는 시스템
+(= 파일을 계속 저장하다가 내가 저장하지 않아도 시스템에서 저장하다가 돌아가고 싶을때 명령어  한줄 쳐서 돌아간다)
+	 -협업: 어떤 사람이 실수를 해도 그것을 다시 되돌릴수 있다.
+       - 툴 : 깃
+ 2. 깃
+ - 데이터 저장 방식 : 스냅샷을 찍듯이 데이터를 취급한다.=> 파일 전체를 대량으로 하는 것보다 단위가 작다=> 그래서 메모리를 적게 쓴다=>빠르다
+- 네트워크가 필요없기 때문에 오프라인에서도 바로바로 저장 됨
+- 어떤 파일로 어떻게 돌아가냐 
+	 	-> if  빈파일에다가 어떤 텍스트를 넣었어요. 이저장 내용 키랑 벨류에 넣는 것
+  		->키(key)-벨류(value)
+      		-키는 고유하다/중복이없다(*키는 헤시로 구성 ==여기까지는 알필요 없다)
+    			-벨루= 내가 넣은텍스트
+- 깃상태
+  -수정: 어떤 파일이 변경된 상태
+  -커밋: 저장
+  -스테이지:스냅샷을 찍어서 커밋할 준비가 된상태
+  -스테이징(add로 한다)->커밋
+ -깃 커밋 순서:
+ 상태체크-> (수정)->스테이징->커밋
+*스냅샷:  깃에서의 스냅샷은 프로젝트릐 특정 시점에서의 모든 파일과 폴더의 상태를 포착하는 거이다. 깃에서 새로운 변경사항을 젖아할 때마다 . 깃은 그 순간의 프로젝트 상태를 기록한다.
+ ....
+#깃 실습하기
+1)버전 체크
+ git --version ( - -의 역할은 두개로 저장된다????) & git -v 둘다가능
+  *git -v --version(-v옵션은 무시되고 깃의 버전정보만 출력된다)
+  ls -l
+  ls --list"(x)
+ * - = 대쉬
+2)사용자 정보 설정하기(git을 처음 사용할때 꼭 사용자이름과 이메일 주소를 등록해 주어야한다)
+-name
+-email
+-옵션: --global: 전체 시스템에 영향을 준다.
+	ex)git config - -global user.name ahriii 이렇게 하고 난뒤
+-> git config user.name
+	ex)git config - -global user.email myemail@naver.com
+->git config user.email
+  -프로젝트마다 다른 이름을 사용하고 싶을 경우는 옵션을 제외함
+- core.editor(파일 내용을 편집하는것)
+  -vi 빠져나올 때는 :q + enter
+*git help <프로그램명> => 빠져나올때는 quit ex)git help config
+*git config  - -list :config 된것의 전체목록을 보고싶을때
+
+=====================
+#디렉터리(directory)
+1.디렉터리의 정의 
+-우리가 말하는 "폴더"
+-디렉터리는 리눅스에서  트리구조를 가진다.
+  animals/
+  ㄴ name.txt
+  ㄴ age.txt
+    		mammals/
+    			L cow.txt
+2.디렉터리의 유형
+-현재 디렉터리:working directory, current directory
+-하위 디렉터리(child) - animals > mammals
+-상위 디렉터리(parent) -mammmals > animals
+-형제 디렉터리(sivling,동일 parent 디렉터리를 갖고 있는 디렉터리) -mammals, reptile
+3.디렉터리의 경로 
+-   <디렉터리/...../파일명>: 디렉터리는  /(슬래시)로 구분함
+  ex)animals/mammals/cow.txt(오른쪽으로 갈수록 하위로 가는것, 마지막에 파일명)
+- / :루트 디렉터리 (=맨처음)로 이동한다.
+-절대 경로:루트에서부터 시작하는 경로
+-상대경로 :현재 기준(어떤 특정 디렉터리 기준)
+  ex)나의 현재 위치가 mammals 이다. 근데 위로(상위 디렉터리) 가고 싶다 
+=> 방법1) 절대경로: /....../mammals 
+	방법2) 상대경로: ..
+    ..  : 부모 디렉토리로가는 것 
+		ex)cd (띄어쓰기).. :위로 가겠다.
+    . : 현재 (or 하위도 가능 :$)
+			ex) cd ./mammals: 현재에서 더 밑으로 가겠다. /mammals로 가겠다.
++)디렉터리 이동실습하기 (25분)
+	1)일단 어떤 폴더들이 있는지 한번 볼까 ?->ls 명령어 쳐서 뭐있는지 보기:&ls
+	2) notes 라는 곳으로 가고 싶다. -> $cd notes
+ 		 cd : change directory
+	3)나의 현재 경로를 알고 싶다. 내가 notes에 있는지 확인해보자->$ pwd
+		pwd명령어 사용->그러면 현재위치의 절대경로가 뜰것이다.
+	4) 근데 내가 다시 상위 로 가고 싶다.->$cd ..
+	 	부모디렉터리로 갈때 “ ..”을 사용 
+	5) 잘 갔는지 확인 해볼까 ->&ls 로 notes에 파란표시 있는지 확인
+
+4. 디렉터리 만들기-mkdir
+-> 명령어: $ mkdir new_dir2
+-> 			$ ls 하면 dir2가 나옴
+->
+Q. new _dir로 이동해서 디렉터리 "dir2 " 만들어보기
+A.	~/oss/new_dir$mkdir dir2
+===================
+3. 깃 초기화
+ git init:(git이라는 디렉터리가 생기고) .git에 모든 변경사항(스냅샷)이 저장이 된다.
+
+4. 상태 체크
+  -상태체크:git status -> /(슬래쉬)가 뒤에 붙은 것은 디렉터리고 나머지는 파일이다.
+  -깃이 모르는 파일일 경우
+  :(modify 가 아니라)untracked -> 'add' ->tracked
+-완전중요 :adding을 해야 commit(저장)을 할수 있다.
+    +실습하기) -git 초기화부터 해야됨
+	1. Git의 상태 체크 하기: 
+		$ git status => untracked files가 뜨면
+	2. add하기(tracking 하기)
+		$ git add animals.txt
+       3. 다시 상태체크 하기 
+		& git status =>두가지가 뜰것이다. -> 하나는 트랙이 되었으니 adding을 하세요 다른 하나는 untracked files(모르는 파일이다)
+	4. 만약 여기서 commit을 한다. 트랙이 된파일 ,즉 adding을 해야 commit을 할수록 있다 . adding을 하지 않는 파일은 아무리해도 저장이 안된다.-> $ git commit :옆에 창이 뜨는데 여기서 원하는 메세지를 넣는거다.
+
+
+
+
+
+  add -> commit(1.add로 기록할 파일 고르고 2.commit 은 고른 파일 저장)
+  -branch 정보 : main  버전을 여러개 만들고 싶다. 회사별로 다른 버전을 만들고 싶을때 branch를 새로 만든다.
+  -f37dfie -키 정보
+  -init commit- 내가 넣은 메세지
+  -1 file chandged, 7 inserions(+):변경 사항->파일하나 변경했고, 7개의 insertion이 있었다.
+
+[main (root-commit) 53637aa] init commit
+ 1 file changed, 7 insertions(+)
+ create mode 100644 animals.txt
+
+-git status
+-git add<파일명>
+-git commit -m<메세지>
+Ex)git commit -m “Add new feature”
+
+
+*cat은 파일의 내용을 보는 명령어 
+
+
+
