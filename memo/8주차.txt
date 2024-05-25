@@ -1,0 +1,185 @@
+7장
+#변수
+1) 선언 방법: var="contents(내가 원하는 내용)“
+2) ‘=’ 앞뒤로 공백이 없어야 한다 ex) var=kim
+          -> 공백이 필요하면 ”“쓰기    var="kim lee hong"
+3)리눅스는 데이터 타입이 없음. 그래서 모두 문자열로 인식된다.
+4) 사용방법: 
+  echo $ var
+- var의 진짜 리터럴 값은 셸이 값을 치환한다(셸이 값을 바꿔준다) .(언제 치환하냐? 선언시 x  프로그램 구동 시) 셸이 var을 읽고 echo한테 echo kim을 돌려주고 echo가 kim을 반환하는 순서)
+5) 변수라는 애를  정규표현식 으로 나타냈을 때 =>[a-zA-Z_0-9]*
+6) 할당 
+-프로그램 이름도 변수로 받을 수 있다. 
+command=wc
+op=-c
+$command $op animals.txt
+- 다른 변수도 새 변수로 할당할 수 있다.
+var2=$var
+echo $var2
+-> 내가 var에 이름이 들어가 있는데 var2해서 var로 할당을 하면 똑같은게 뜬다.
+-선언하지 않은 변수: 보통 프로그램에서 는 오류가 나지만, 셸에서는  null값으로 설정됨 (오류가 나지 않는다.)
+ex)
+(var3선언한적 없음)
+$ echo $var2
+
+($ echo $var2 이거 출력하면 공백 출력됨)
+$wc –c $var3 ./data/animals.txt
+374 ./data/animals.txt
+
+null값 출력하는 방법 3가지
+var=
+var=""
+var=''
+* var=' '(공백1개가 있는 경우인데 이건 null과 완전히 다르다)
+#변수 활용하기
+ file=grades->grades1으로 바꾸고 싶다,
+방법1) file=grades1  (file을 다시 선언하는 것)
+방법2)'${변수}' 구조 사용
+ex)${file}1
+Q) grades ->grades1  파일병변경]
+>file=grades
+mv grades ${file}1
+
+## substring  추출하기
+${var:start:size}#일반적인 프로그램에서의 substirng추출과느다름 보통은 start:end이런식이지만 이것은 end가 아니라 size를 지정 
+ex)${var:10:4} (출력은 11,12,13,14 =>10 다음부터 4개)
+ex)
+~/KYG$ file=animals.txt
+~/KYG$ ${file:0:7}
+bash: animals: command not found
+Failed to install animals.
+animals: command not found
+~/KYG$ echo ${file:0:7}
+animals
+Q) animals.txt -> animal.md 로 바꿔 서 저장하는 코드 짜라
+>>$ mv ${file:0:7}.txt ${file:0:7}.md
+
+
+
+##$(( 변수 )) 구조
+-수학 연산을 가능하게 하는 구조
+-숫자인 문자열이 들어왔을 때 , 숫자로 인식함
+ex)var=5
+ result=$((var + 2))
+echo $result
+
+Q) 5를 변수에 담고 활용해서 15를 변수에 담아봐라. (5를 사용해서 15가 담긴 어떤 변수를 만들어라) 
+~/KYG$ five=5
+~/KYG$ fifteen=$((five * 3))
+~/KYG$ echo $fifteen
+15
+ex) 
+ten=10
+~/KYG$ $(( ten = ten +1 ))
+bash: 11: command not found
+Failed to install 11.
+11: command not found
+~/KYG$ echo $(( ten = ten +1 ))
+12
+
+
+* 괄호안에서 변수를 선언할수도 있는데 그랬을때 초기값이 null값즉, 0으로 설정
+~/KYG$ echo $(( ten = ten +1))
+1
+~/KYG$ echo $ten
+1
+#비교연산 
+$(( ten > 0)) # 1 == True, 0 == False
+Q) 임의의 수 num이 2의 배수인지 확인하는 코드 작성기( /:몫을 알고 싶을 때 , % 나머지를 알고 싶을 때)
+~/KYG$ echo $(( num %2 ==0 ))
+1
+~/KYG$ num=5
+~/KYG$ echo $(( num%2 == 0 ))
+0
+-------------------------
+~/KYG$ num=11 ; echo $(( num %2 == 0 ))
+0
+
+##$( ) 표현
+-명령의 결과값을 변수에 담고 싶을 때
+ex) result=$( cat /etc/paswd | cut -d: -f1 )
+
+# 스크립트 파일 작성하기
+- 파일 확장자는 .sh or none(파일 확장자 없어도 된다.)
+1)파일을 실행가능한 상태로 바꾼다.
+2)실행하기
+-shebang 달기: #!/bin/bash 스크립트가 bash로 쓰여졌다는 것을 알려주는 것, 관례적으로 써야하는 것이다.(이 파일이 bash로 돌아간다는 것을 확실하게 알려주는 것)
+
+
+-------------
+스크립트 파일 작성하기 실습
+1) 그냥 파일 열기 vi ex1
+2) 그 파일에다가 shebang작성:#!/bin/bash  그리고 echo hello world 쓰기 - > 그리고 :wq!+enter
+3)나오고 나서 ex1 쳐서 실행할려면 안된다, 이유는? 아직 실행가능하지 않기 때문이다.
+그래서 첫 번째 단계는 파일을 실행 가능하게 만들어야 하는데 chmod +x ex1한다.
+4)그 다음 실행해보자 위치지정과 함꼐(프로그램에 따라 위치지정 없이 하면 안될때도 있기 때문이다) =>~/KYG$ ./ex1하면 안에 있는 게 바깥에서 실행됨*
+*주석 달기 # 주석
+
+<인수>
+
+##위치 인수 (positional argument)
+-$n (~9까지만)  ->${10} : 10 이상일 때 
+-외부에서 인수를 받아와서 사용할 때
+
+## $#
+- 총 인수 개수
+- 큰 따움표로 인수 감싸는 습관 들여야 함 ex) echo “$#”(o) / echo ‘$#’(x)
+-> ‘’의 경우 모든 기능이 해제되서 쓰면 안됨
+*변수로 설정해서 사용할수도 있다.
+name=“$1”
+echo $name
+
+## $* 
+- 모든 인수를 출력해주는 변수
+
+Q) 디렉토리를 인수로 받아서, 파일과 디렉토리 개수를 세는 스크립트 짜기
+''' sh
+=>파일명은   count
+
+-출력-
+현재위치: ...
+파일 ....개 , 폴더 ...개 입니다.
+test case 1: .
+test case 2: *
+
+
+
+#전화번호부 관리 스크립트 만들기
+1) 검색
+./book.sh 이름 
+->./book.sh 이름을 했을 때 그 이름을 프린트 해야한다.
+
+#!/bin/bash
+name="$1"
+echo "이름은 $name 입니다."
+phone=$(grep "$name" book.txt | cut -d' ' -f3)
+echo "$name의 전화번호는 $phone 입니다."
+
+
+
+
+2)추가
+-이름, 번호를 인자로 넣어 추가
+3)삭제
+-이름으로 검색해서 이름,번호를 삭제하기
+
+
+#!/bin/bash
+# 1번
+name="$1"
+echo "이름은 $name 입니다."
+phone=$(grep "$name" book.txt | cut -d' ' -f3)
+echo "$name의 전화번호는 $phone 입니다."
+# 2번
+firstname="$1"
+lastname="$2"
+phonenum="$3"
+echo "새로 추가된 정보는 $1 $2 $3 입니다." >> book.txt
+# 3번
+deletename="$1"
+# 삭제할 이름을 포함하지 않는 줄을 임시 파일에 저장
+grep -v "deletename" book.txt > temp.txt
+# 임시 파일을 원본 파일로 이동하여 덮어쓰기
+mv temp.txt book.txt
+echo "$deletename의 정보가 삭제되었습니다."
+
